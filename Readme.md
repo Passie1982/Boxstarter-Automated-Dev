@@ -14,4 +14,4 @@ Download the the file Azure-CreateAndPrepareVM.ps1 from the repository. Use powe
 
     .\Azure-CreateAndPrepareVM.ps1 -imageFamilyName "Visual Studio Premium 2013 Update 4 on Windows 8.1 Enterprise N (x64)" -azurePublishSettingsFile "c:\temp\publishfile.publishsettings" -subscriptionName "Subscription name" -storageAccountName "Storage account name" -vmName “VM name" -vmSize "Large" -vmLocation "West Europe" -vmUserName "User name" -cloudServiceName "Cloud service name"
 
-Please note that the parameters have to filled with correct data.
+Please note that the parameters have to filled with correct data and that tha cloudServiceName parameter is optional
