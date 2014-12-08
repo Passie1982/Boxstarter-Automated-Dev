@@ -1,0 +1,57 @@
+$Boxstarter.RebootOk=$true # Allow reboots?
+$Boxstarter.NoPassword=$false # Is this a machine with no login password?
+$Boxstarter.AutoLogin=$true # Save my password securely and auto-login after a reboot
+
+Update-ExecutionPolicy Unrestricted
+Set-ExplorerOptions -showHidenFilesFoldersDrives -showProtectedOSFiles -showFileExtensions
+Enable-RemoteDesktop
+Disable-InternetExplorerESC
+Disable-UAC
+Set-TaskbarSmall
+
+if (Test-PendingReboot) { Invoke-Reboot }
+
+# Update Windows and reboot if necessary
+Install-WindowsUpdate -AcceptEula
+if (Test-PendingReboot) { Invoke-Reboot }
+
+choco install DotNet3.5 # Not automatically installed with VS 2013. Includes .NET 2.0. Uses Windows Features to install.
+if (Test-PendingReboot) { Invoke-Reboot }
+
+choco install DotNet4.0
+choco install DotNet4.5 # should be automatically installed with Windows 8.1 and Windows Server 2012
+if (Test-PendingReboot) { Invoke-Reboot }
+
+# Update component itself
+choco update
+
+# Windows Tools
+choco install powershell4
+
+# VSIS Packages
+Install-ChocolateyVsixPackage PowerShellTools http://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597/file/112013/6/PowerShellTools.vsix
+Install-ChocolateyVsixPackage WebEssentials2013 http://visualstudiogallery.msdn.microsoft.com/56633663-6799-41d7-9df7-0f2a504ca361/file/105627/31/WebEssentials2013.vsix
+Install-ChocolateyVsixPackage T4Toolbox http://visualstudiogallery.msdn.microsoft.com/791817a4-eb9a-4000-9c85-972cc60fd5aa/file/116854/1/T4Toolbox.12.vsix
+Install-ChocolateyVsixPackage StopOnFirstBuildError http://visualstudiogallery.msdn.microsoft.com/91aaa139-5d3c-43a7-b39f-369196a84fa5/file/44205/3/StopOnFirstBuildError.vsix
+
+# Dev Tools
+choco install notepadplusplus.install
+choco install resharper
+choco install fiddler4
+choco install NugetPackageExplorer
+choco install webpi
+
+# Browsers
+choco install GoogleChrome
+choco install Firefox
+
+# Utilities
+choco install 7zip
+choco install adobereader
+
+# Taskbar items
+Install-ChocolateyPinnedTaskBarItem "$env:localappdata\Google\Chrome\Application\chrome.exe"
+Install-ChocolateyPinnedTaskBarItem "$env:windir\explorer.exe"
+Install-ChocolateyPinnedTaskBarItem "$env:SystemRoot\system32\WindowsPowerShell\v1.0\powershell.exe"
+Install-ChocolateyPinnedTaskBarItem "$env:programfiles\Notepad++\notepad++.exe"
+Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Microsoft Visual Studio 12.0\Common7\IDE\devenv.exe"
