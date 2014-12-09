@@ -144,7 +144,7 @@ function CreateVirtualMachine
     $vmConfig = New-AzureVMConfig -Name $vmName -InstanceSize $vmSize -ImageName $imageName |
                     Add-AzureProvisioningConfig -Windows -EnableWinRMHttp -AdminUsername $vmUserName -Password $vmUserPassword
          
-    Write-Host "$(Get-Date): Start to create virtual machine: $vmName." 
+    Write-Host "$(Get-Date): Start to create virtual machine: $vmName." -ErrorAction Stop
 
     New-AzureVM -VMs $vmConfig -Location $storageAccount.Location -ServiceName $serviceName -WaitForBoot
 }
@@ -251,20 +251,25 @@ Import-AzurePublishSettingsFile -PublishSettingsFile $azurePublishSettingsFile -
 Select-AzureSubscription -SubscriptionName $subscriptionName -ErrorAction Stop
 Set-AzureSubscription -SubscriptionName $subscriptionName -CurrentStorageAccount $storageAccountName -ErrorAction Stop
 
-$imageName = GetLatestImage $imageFamilyName $vmLocation
-
-if($imageName -eq $null){
-    Write-Error "$(Get-Date): No valid image found. Please check if the imageFamilyName is correct or change the vmLocation"
-    return
-}
-
 # Use vmName as serviceName. Clean up the existing one before creation.
 if($cloudServiceName -eq $null){
     $cloudServiceName = $vmName
 }
 
-CreateVirtualMachine $imageName $storageAccountName $cloudServiceName $vmName $vmSize $vmUserName $credentials.GetNetworkCredential().Password
+$existingVM = Get-AzureVM -ServiceName $cloudServiceName -Name $vmName
+if($existingVM -eq $null){
 
+    $imageName = GetLatestImage $imageFamilyName $vmLocation
+
+    if($imageName -eq $null){
+        Write-Error "$(Get-Date): No valid image found. Please check if the imageFamilyName is correct or change the vmLocation"
+        return
+    }
+
+    CreateVirtualMachine $imageName $storageAccountName $cloudServiceName $vmName $vmSize $vmUserName $credentials.GetNetworkCredential().Password
+}else{
+    Write-Host "$(Get-Date): VM $vmName already exists on service $cloudServiceName."
+}
 Write-Host "$(Get-Date): Start to download and install the remoting cert (self-signed) to local machine trusted root."
 DownloadAndInstallWinRMCert $cloudServiceName $vmName
 
