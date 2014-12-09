@@ -10,7 +10,7 @@
 Click on the following url:
 [http://boxstarter.org/package/nr/Boxstarter.Azure](http://boxstarter.org/package/nr/Boxstarter.Azure)
 
-This will download a clock-once application to install BoxStarter and the Azure components that are used in the script.
+This will download a click-once application to install BoxStarter and the Azure components that are used in the script.
 
 ### Run the script ###
 Download the the file Azure-CreateAndPrepareVM.ps1 from the repository. Use powershell in administrative mode and execute the script by the following commands:
