@@ -7,8 +7,8 @@
 
     The script must be executed with elevated privileges.
 .EXAMPLE
-    .\Azure-CreateAndPrepareVM.ps1 -imageFamilyName "Visual Studio Premium 2013 Update 4 on Windows 8.1 Enterprise N (x64)" -azurePublishSettingsFile "c:\temp\publishfile.publishsettings" -subscriptionName "Subscription name" -storageAccountName "Storage account name" -vmName “VM name" -vmSize "Large" -vmLocation "West Europe" -vmUserName "User name" -cloudServiceName "Cloud service name"
-    .\Azure-CreateAndPrepareVM.ps1 -imageFamilyName "Visual Studio Premium 2013 Update 4*" -azurePublishSettingsFile "c:\temp\publishfile.publishsettings" -subscriptionName "Subscription name" -storageAccountName "Storage name" -vmName “VM name" -vmSize "Large" -vmLocation "West Europe" -vmUserName "User name"
+    .\Azure-CreateAndPrepareVM.ps1 -imageFamilyName "Visual Studio Premium 2013 Update 4 on Windows 8.1 Enterprise N (x64)" -azurePublishSettingsFile "D:\Development\Azure\Aviva Solutions-Akzonobel-12-2-2014-credentials.publishsettings" -subscriptionName "Aviva Solutions" -storageAccountName "portalvhds3gxb4dl5d0615" -vmName “AvDevEnvVM02" -vmSize "Large" -vmLocation "West Europe" -vmUserName "AzureAdmin" -cloudServiceName "MyAvivaDevEnv"
+    .\Azure-CreateAndPrepareVM.ps1 -imageFamilyName "Visual Studio Premium 2013 Update 4*" -azurePublishSettingsFile "D:\Development\Azure\Aviva Solutions-Akzonobel-12-2-2014-credentials.publishsettings" -subscriptionName "Aviva Solutions" -storageAccountName "portalvhds3gxb4dl5d0615" -vmName “AvDevEnvVM02" -vmSize "Large" -vmLocation "West Europe" -vmUserName "AzureAdmin"
 #>
 
 Param(
@@ -34,7 +34,7 @@ Param(
 
     # The size of the Virtual Machine
     [Parameter(Mandatory=$true, Position=5, ValueFromPipeline=$false)]
-    [ValidateSet("extra small", "small", "medium", "large", "extra large")] 
+    [ValidateSet("ExtraSmall","Small","Medium","Large","ExtraLarge","A5","A6","A7","A8","A9","Basic_A0","Basic_A1","Basic_A2","Basic_A3","Basic_A4","Standard_D1","Standard_D2","Standard_D3","Standard_D4","Standard_D11","Standard_D12","Standard_D13","Standard_D14")] 
     [string]$vmSize, 
 
     # The location where the Virtual Machine will be stored
@@ -100,8 +100,8 @@ function GetLatestImage
     $serviceName - The name of the Cloud Service for the Virtual Machine.
     $vmName - The name of the Virtual Machine.
     $vmSize - The size of the Virtual Machine.
-    $vmUserName - The name of the admin account.
-    $vmUserPassword - The password of the admin account. 
+    $adminUserName - The name of the admin account.
+    $adminUserPassword - The password of the admin account. 
 .OUTPUTS
     None.
 #>
@@ -213,7 +213,6 @@ function DownloadAndInstallWinRMCert
 .INPUTS
    $serviceName - The name of the Cloud Service.
    $vmName - The name of the Virtual Machine.
-   $credentials vor the vm $vmName/$vmUsername
 .OUTPUTS
    NONE
 #>
@@ -235,7 +234,7 @@ function DecorateVM
     Enable-BoxstarterVM -provider Azure -CloudServiceName $serviceName `
         -VMName $vmName -Credential $credentials  | 
     Install-BoxstarterPackage `
-     -Package https://gist.githubusercontent.com/anonymous/0efc2c8de71ca1a72e34/raw/a5f337017ed19a4ffadbae155e9aff8feb12d55b/gistfile1.txt
+     -Package https://raw.githubusercontent.com/Passie1982/Boxstarter-Automated-Dev/master/src/Boxstarter%20dev%20script.txt
     
 }
 
@@ -243,6 +242,10 @@ function DecorateVM
 
 # Get the credentials from the user 
 $credentials = Get-Credential  $vmName\$vmUserName
+
+if($credentials -eq $null){
+    return
+}
 
 Import-AzurePublishSettingsFile -PublishSettingsFile $azurePublishSettingsFile -ErrorAction Stop
 Select-AzureSubscription -SubscriptionName $subscriptionName -ErrorAction Stop
@@ -262,10 +265,13 @@ if($cloudServiceName -eq $null){
 
 CreateVirtualMachine $imageName $storageAccountName $cloudServiceName $vmName $vmSize $vmUserName $credentials.GetNetworkCredential().Password
 
-Write-Host "$(Get-Date): Start to download and install the remoting cert (self-signed) to local machine trusted root." -ForegroundColor Green
+Write-Host "$(Get-Date): Start to download and install the remoting cert (self-signed) to local machine trusted root."
 DownloadAndInstallWinRMCert $cloudServiceName $vmName
 
-Write-Host "$(Get-Date): Start to decorate the vm image with configuration and applications" -ForegroundColor Green
+Write-Host "$(Get-Date): Start to decorate the vm image with configuration and applications"
 DecorateVM $cloudServiceName $vmName $credentials
 
-Write-Host "$(Get-Date): Please run Get-AzureRemoteDesktopFile to connect the machine and login as $vmName\$vmUserName." -ForegroundColor Green 
+Write-Host "$(Get-Date): Getting the RDP file for the vm $vmName"
+Get-AzureRemoteDesktopFile -ServiceName $cloudServiceName -Name $vmName -LocalPath $env:USERPROFILE\Desktop\$vmName.rdp
+
+Write-Host "$(Get-Date): Please run $vmName.rdp from the desktop and login as $vmName\$vmUserName." 
