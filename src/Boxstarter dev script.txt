@@ -12,8 +12,8 @@ Set-TaskbarSmall
 if (Test-PendingReboot) { Invoke-Reboot }
 
 # Update Windows and reboot if necessary
-Install-WindowsUpdate -AcceptEula
-if (Test-PendingReboot) { Invoke-Reboot }
+#Install-WindowsUpdate -AcceptEula
+#if (Test-PendingReboot) { Invoke-Reboot }
 
 choco install DotNet3.5 # Not automatically installed with VS 2013. Includes .NET 2.0. Uses Windows Features to install.
 if (Test-PendingReboot) { Invoke-Reboot }
