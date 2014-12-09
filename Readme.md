@@ -7,7 +7,10 @@
 - Boxstarter
 
 ### Install Boxstarter ###
-Download the boxstarter package from: [http://boxstarter.org/](http://boxstarter.org/). Unzip the package and run the setup.bat file. After installation Boxstarter is ready to run some scripts.
+Click on the following url:
+[http://boxstarter.org/package/nr/Boxstarter.Azure](http://boxstarter.org/package/nr/Boxstarter.Azure)
+
+This will install BoxStarter and the Azure components that are used in the script.
 
 ### Run the script ###
 Download the the file Azure-CreateAndPrepareVM.ps1 from the repository. Use powershell in administrative mode and execute the script by the following commands:
